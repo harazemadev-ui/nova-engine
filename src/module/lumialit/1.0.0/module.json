@@ -1,0 +1,17 @@
+{
+    "id": "lumia-lit",
+    "name": "Lumia Lit",
+    "version": "1.0.0",
+    "description": "An example AI module",
+    "model": "gemini-3.7-flash",
+    "author": {
+        "name": "Hara",
+        "id": "..."
+    },
+    "entry": "entry.py",
+    "nova": {
+        "minimum_version": "0.1.0"
+    },
+    "permissions": [],
+    "dependencies": []
+}

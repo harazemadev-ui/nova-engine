@@ -1,0 +1,19 @@
+[project]
+name = "nova-engine"
+version = "0.1.0"
+description = "Nova Engine - AI execution and module framework"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "python-dotenv",
+    "groq",
+    "google-genai",
+    "xai-sdk",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"

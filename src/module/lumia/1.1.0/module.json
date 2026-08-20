@@ -1,0 +1,16 @@
+{
+    "id": "lumia",
+    "name": "Lumia",
+    "version": "1.1.0",
+    "description": "An example AI module",
+    "author": {
+        "name": "Hara",
+        "id": "..."
+    },
+    "entry": "entry.py",
+    "nova": {
+        "minimum_version": "0.1.0"
+    },
+    "permissions": [],
+    "dependencies": []
+}
