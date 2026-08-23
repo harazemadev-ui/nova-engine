@@ -1,21 +1,24 @@
-import importlib.util
+from importlib.util import module_from_spec, spec_from_file_location
 import json
 import sys
 from pathlib import Path
 
 from .request import NovaRequest
 from .response import NovaResponse
-
+from ..moduledata.moduleresult import ModuleResult
+from ..memory.manager import NovaMemoryManager
 
 MODULE_FOLDER_PATH = (
-    Path(__file__).resolve().parents[2] / "src" / "module"
+    Path(__file__).resolve()
+    .parent.parent
+    / "module"
 )
 
 
 class NovaEngine:
 
     def __init__(self):
-        pass
+        self.memory_manager = NovaMemoryManager()
 
     def process(self, request: NovaRequest) -> NovaResponse | None:
         module = self.load_module(request)
@@ -48,6 +51,7 @@ class NovaEngine:
         try:
             with open(module_json, "r") as file:
                 module_data = json.load(file)
+
         except (OSError, json.JSONDecodeError) as error:
             print(f"Failed to read module.json: {error}")
             return None
@@ -62,7 +66,7 @@ class NovaEngine:
             f"nova_module_{request.module}_{request.version}"
         )
 
-        spec = importlib.util.spec_from_file_location(
+        spec = spec_from_file_location(
             module_name,
             module_entry
         )
@@ -71,7 +75,7 @@ class NovaEngine:
             print(f"Could not load module: {module_entry}")
             return None
 
-        loaded_module = importlib.util.module_from_spec(spec)
+        loaded_module = module_from_spec(spec)
 
         if str(version_path) not in sys.path:
             sys.path.insert(0, str(version_path))
@@ -80,7 +84,11 @@ class NovaEngine:
 
         return loaded_module
 
-    def load_version(self, module: Path, version: str) -> Path | None:
+    def load_version(
+        self,
+        module: Path,
+        version: str
+    ) -> Path | None:
 
         version_path = module / version
 
@@ -101,6 +109,7 @@ class NovaEngine:
         try:
             with open(module_json, "r") as file:
                 module_data = json.load(file)
+
         except (OSError, json.JSONDecodeError) as error:
             print(f"Failed to read module.json: {error}")
             return None
@@ -120,7 +129,8 @@ class NovaEngine:
         self,
         module,
         request: NovaRequest
-    ):
+    ) -> ModuleResult | None:
+
         if not hasattr(module, "generate"):
             print(
                 "Loaded module does not have a "
@@ -128,33 +138,79 @@ class NovaEngine:
             )
             return None
 
-        module_context = request.create_module_context()
+        memories = self.memory_manager.get_context(
+            user_uid=request.userUID,
+            chat_uid=request.chatUID
+        )
 
-        return module.generate(module_context)
+        print("========== MEMORY CONTEXT ==========")
+        print(json.dumps(memories, indent=2))
+        print("====================================")
+
+        module_context = request.create_module_context(
+            memories
+        )
+
+        result = module.generate(module_context)
+
+        if result is None:
+            return None
+
+        # Execute memory actions requested by Lumia
+        for action in result.memory_actions:
+
+            action_type = action.get("action")
+
+            if action_type == "create":
+
+                self.memory_manager.create_memory(
+                    user_uid=request.userUID,
+                    chat_uid=action.get("chatUID"),
+                    memory_type=action.get("type"),
+                    key=action.get("key"),
+                    content=action.get("content")
+                )
+
+                print(
+                    f"Memory created: {action.get('key')}"
+                )
+
+            elif action_type == "update":
+
+                self.memory_manager.update_memory(
+                    memory_uid=action.get("memoryUID"),
+                    content=action.get("content"),
+                    key=action.get("key"),
+                    memory_type=action.get("type")
+                )
+
+                print(
+                    f"Memory updated: {action.get('memoryUID')}"
+                )
+
+            elif action_type == "delete":
+
+                self.memory_manager.delete_memory(
+                    action.get("memoryUID")
+                )
+
+                print(
+                    f"Memory deleted: {action.get('memoryUID')}"
+                )
+
+            else:
+                print(
+                    f"Unknown memory action: {action_type}"
+                )
+
+        return result
 
     def generate_response(
         self,
-        result
+        result: ModuleResult | None
     ) -> NovaResponse | None:
 
         if result is None:
             return None
 
         return NovaResponse(result.response)
-
-    def stream(self, request: NovaRequest):
-        module = self.load_module(request)
-
-        if module is None:
-            return
-
-        if not hasattr(module, "generate_stream"):
-            print(
-                "Loaded module does not have a "
-                "'generate_stream' function."
-            )
-            return
-
-        module_context = request.create_module_context()
-
-        yield from module.generate_stream(module_context)
