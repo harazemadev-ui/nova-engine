@@ -1,6 +1,6 @@
 [project]
 name = "nova-engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Nova Engine - AI execution and module framework"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,6 +12,8 @@ dependencies = [
     "groq",
     "google-genai",
     "xai-sdk",
+    "redis",
+    "openai",
 ]
 
 [build-system]

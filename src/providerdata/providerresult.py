@@ -1,4 +1,4 @@
-class ModuleResult:
+class ProviderResult:
 
     def __init__(
         self,
