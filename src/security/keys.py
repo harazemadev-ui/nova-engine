@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class NovaKey:
+class OldNovaKey:
 
     def __init__(self):
 

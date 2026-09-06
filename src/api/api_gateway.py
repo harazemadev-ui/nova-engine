@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 
 from ..engine.request import NovaRequest
 from ..engine.engine import NovaEngine
-from ..security.keys import NovaKey
+from ..security.nova_api_key import NovaKey
 from ..errors.nova_error import NovaError
 
 nova_key = NovaKey()
@@ -36,7 +36,7 @@ def post_process_request(
     request: NovaRequest,
     x_nova_api_key: str = Header(None)
 ):
-    if not nova_key.verify_api_key(x_nova_api_key):
+    if not nova_key.verify(x_nova_api_key):
         raise HTTPException(
             status_code=401,
             detail="Invalid NOVA API Key"
