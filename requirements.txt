@@ -7,3 +7,4 @@ google-genai
 xai-sdk
 redis
 openai
+SQLAlchemy>=2.0
