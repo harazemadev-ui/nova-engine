@@ -1,6 +1,6 @@
 [project]
 name = "nova-engine"
-version = "0.2.0"
+version = "0.2.1"
 description = "Nova Engine - AI execution and module framework"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,6 +14,7 @@ dependencies = [
     "xai-sdk",
     "redis",
     "openai",
+    "SQLAlchemy>=2.0",
 ]
 
 [build-system]

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1]
+
+### Added
+- SQLAlchemy-backed Nova API-key storage
+- API-key verification for incoming Nova Engine requests
+- API-key deletion support
+- Improved API-key authentication between Lumia Server and Nova Engine
+
 ## [0.2.0]
 
 ### Added
